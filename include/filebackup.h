@@ -32,9 +32,6 @@ void print_time(unsigned delay);
  */
 #ifdef __unix__ 
 
-//Linux system headers
-#include "signal.h"
-#include "unistd.h"
 void signal_handler(int);
 extern volatile bool flag;
 

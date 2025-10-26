@@ -3,6 +3,10 @@
 #include <iostream>
 #include <print>
 
+//Linux system headers
+#include "signal.h"
+#include "unistd.h"
+
 /**
  * @brief try to accept a new input in case of the path is invalide.
  * 

@@ -1,12 +1,17 @@
+/**
+ * @file filebackup.cpp
+ * @author HUANG He (he.hu4ng@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-10-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include "filebackup.h"
 
 #include <iostream>
 #include <print>
-
-//Linux system headers
-#include "signal.h"
-#include "unistd.h"
-
 /**
  * @brief try to accept a new input in case of the path is invalide.
  * 

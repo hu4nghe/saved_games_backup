@@ -1,3 +1,13 @@
+/**
+ * @file main.cpp
+ * @author HUANG He (he.hu4ng@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-10-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include "filebackup.h"
 
 #include <csignal>
@@ -7,6 +17,11 @@
 
 namespace fs = std::filesystem;
 
+/**
+ * @brief Sleep for a given number of seconds.
+ * 
+ * @param sec Number of seconds to sleep.
+ */
 inline void sleepSeconds(unsigned sec) 
 {
     std::this_thread::sleep_for(std::chrono::seconds(sec));

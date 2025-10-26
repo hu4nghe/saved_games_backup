@@ -2,51 +2,96 @@
  * @file filebackup.cpp
  * @author HUANG He (he.hu4ng@outlook.com)
  * @brief 
- * @version 0.1
+ * @version 0.2
  * @date 2025-10-26
  * 
  * @copyright Copyright (c) 2025
  * 
  */
-#include "filebackup.h"
-
+#include <csignal>
+#include <filesystem>
 #include <iostream>
 #include <print>
+#include <thread>
+
+namespace fs = std::filesystem;
+
 /**
- * @brief try to accept a new input in case of the path is invalide.
- * 
- * @param p old path
+ * @brief Read path and verify if it is valid.
  */
-void input_modification(std::filesystem::path &p)
+auto read_path(const std::string& msg) -> fs::path
 {
-    p.clear();
-    std::string newPath;
-    std::println("This path is invalide ! Please enter a valide path.");
-    std::cin>>newPath;
-    p.assign(newPath);
+	fs::path target_path;
+	do
+	{
+		std::println("{}", msg);
+		std::cin >> target_path;
+		if (!fs::exists(target_path))
+			std::println("Path not found. Try again.");
+
+	} while (!fs::exists(target_path));
+	return target_path;
 }
 
 /**
- * @brief Print Current time and remind user when next backup will be saved.
- * 
- * @param delay 
+ * @brief Create time stamp
  */
-void print_time(unsigned delay)
+auto timestamp_string() -> std::string
 {
-    auto t = time(NULL);
-    auto tm = *localtime(&t);
-
-    std::println("Save backuped at {}/{}/{} {}h{}.", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min);   
-    std::println("Next Backup will be in {} min.",delay);
+	auto time		= std::time(nullptr);
+	auto local_time = *std::localtime(&time);
+	return std::format(
+		"{:04}{:02}{:02}_{:02}{:02}{:02}",
+		local_time.tm_year + 1900,
+		local_time.tm_mon  + 1,
+		local_time.tm_mday,
+		local_time.tm_hour,
+		local_time.tm_min,
+		local_time.tm_sec);
 }
 
-volatile bool flag = true;
 /**
- * @brief A signal handler, makes the program stop when recive Ctrl + C.
- * 
- * @param a 
+ * @brief Call this to backup file.
  */
-void signal_handler(int a)
+void file_backup_agent()
 {
-    flag = false;
+	static volatile bool flag = true; 
+	std::signal(SIGINT, [](int) { flag = false; });
+
+	fs::path file_path	 = read_path("Please enter the file path to backup: ");
+	fs::path backup_root = read_path("Please enter the backup destination directory: ");
+
+	std::println("Enter autosave interval (seconds): ");
+	size_t delay{60};
+	std::cin >> delay;
+
+	std::println("Starting backup agent. Press Ctrl + C to stop.");
+	fs::create_directories(backup_root / "backups");
+	size_t counter{0};
+
+	while (flag)
+	{
+		try
+		{
+			// Backup file name with time stamp
+			auto backup_name = file_path.filename().string() 
+				+ "_" + timestamp_string() 
+				+ "_Save" 
+				+ std::to_string(counter++);
+
+			fs::copy_file(
+				file_path,
+				backup_root / "backups" / backup_name,
+				fs::copy_options::overwrite_existing);
+		}
+		catch (const fs::filesystem_error& e)
+		{
+			std::cerr << "Backup failed: " << e.what() << '\n';
+		}
+
+		for (unsigned i = 0; i < delay && flag; ++i)
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+	}
+
+	std::println("Backup process terminated.");
 }

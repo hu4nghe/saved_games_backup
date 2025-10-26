@@ -1,0 +1,14 @@
+# ===== CMake build =====
+/build/
+
+# ===== clangd =====
+.clangd/
+.clang-format
+.clang-tidy
+
+# ===== VSCode =====
+.vscode/
+
+# ===== Vim =====
+*~
+*.swp
